@@ -14,54 +14,71 @@
             integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI="
             crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://raw.githubusercontent.com/google/palette.js/master/palette.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js"></script>
-    <button type="button" class="btn btn-secondary btn-get-data" id="btn-get-data">Обновить</button>
-    <div id="divChart">
-        <div class="content-data" data-url ="{% url 'graph_data' %}"> DATA </div>
-        <canvas id="canvas"></canvas>
+
+    <h1 align="center">График отправленных сообщений</h1>
+    <div align="center" id="divChart">
+        <div class="content-data" data-url ="{% url 'graph_data' %}"></div>
+        <canvas id="canvas" width="800" height="800"></canvas>
     </div>
+    <div align="center">
+        <button type="button" class="btn btn-secondary btn-get-data" id="btn-get-data">Обновить</button>
+    </div>
+
     <script>
+        $(document).ready ( function(){
+            graphCreate()
+        });
         document.getElementById('btn-get-data').onclick = function (){
+            graphCreate()
+        }
+        function graphCreate() {
             $.ajax({
-                url:  $('.content-data').data('url'),
+                url: $('.content-data').data('url'),
                 type: 'GET',
                 dataType: 'JSON',
-                success: function (resp){
-                    console.log(typeof resp);
-                    $(".content-data").html(resp);
+                success: function (resp) {
                     const obj = JSON.parse(resp);
                     console.log(obj);
-                    var labels = obj.map(function(e) {
+                    const labels = obj.map(function (e) {
                         return e.profile__name;
                     });
+                    const backgroundcolor = [];
+                    for (i = 0; i < labels.length; i++) {
+                        const r = Math.floor(Math.random() * 255);
+                        const g = Math.floor(Math.random() * 255);
+                        const b = Math.floor(Math.random() * 255);
+                        backgroundcolor.push('rgba(' + r + ', ' + g + ', ' + b + ', 1.0)');
+                    }
                     console.log(labels);
-                    var data = obj.map(function(e) {
-                       return e.qs_count;
+                    const data = obj.map(function (e) {
+                        return e.qs_count;
                     });
 
-                    var ctx = canvas.getContext('2d');
-                    var config = {
-                       type: 'doughnut',
-                       data: {
-                          labels: labels,
-                          datasets: [{
-                             label: 'Graph Line',
-                             data: data,
-                             backgroundColor: 'rgba(238,0,255,0.3)'
-                          }]
-                       }
+                    const ctx = canvas.getContext('2d');
+                    const config = {
+                        type: 'doughnut',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Статистика сообщений',
+                                backgroundColor: backgroundcolor,
+                                data: data,
+                            }]
+                        },
+                        options: {
+                            responsive: false,
+                        },
                     };
 
-                    var chart = new Chart(ctx, config);
+                    const chart = new Chart(ctx, config);
                 },
-                error: function (resp){
+                error: function (resp) {
                     console.log('something went wrong')
                 }
             });
-            //const obj = JSON.parse(jsonstr);
-
         }
     </script>
-
 </body>
 </html>
