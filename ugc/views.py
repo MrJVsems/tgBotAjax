@@ -24,11 +24,10 @@ def get(request, *args, **kwargs):
     users_cnt_messages = Message.objects.values('profile__name').annotate(
         qs_count=Count('text'),
     )
-    users_cnt_messages = Message.objects.all()
 
     if is_ajax(request):
-        users_cnt_messages_serializers = serializers.serialize('json', users_cnt_messages)
-        return JsonResponse(users_cnt_messages_serializers, safe=True)
+        msg_json = json.dumps(list(users_cnt_messages))
+        return JsonResponse(msg_json, safe=False)
 
 
 def is_ajax(request):

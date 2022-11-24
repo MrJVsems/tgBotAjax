@@ -14,9 +14,11 @@
             integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI="
             crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js"></script>
     <button type="button" class="btn btn-secondary btn-get-data" id="btn-get-data">Обновить</button>
     <div id="divChart">
         <div class="content-data" data-url ="{% url 'graph_data' %}"> DATA </div>
+        <canvas id="canvas"></canvas>
     </div>
     <script>
         document.getElementById('btn-get-data').onclick = function (){
@@ -25,48 +27,41 @@
                 type: 'GET',
                 dataType: 'JSON',
                 success: function (resp){
+                    console.log(typeof resp);
                     $(".content-data").html(resp);
-                    console.log('success')
+                    const obj = JSON.parse(resp);
+                    console.log(obj);
+                    var labels = obj.map(function(e) {
+                        return e.profile__name;
+                    });
+                    console.log(labels);
+                    var data = obj.map(function(e) {
+                       return e.qs_count;
+                    });
+
+                    var ctx = canvas.getContext('2d');
+                    var config = {
+                       type: 'doughnut',
+                       data: {
+                          labels: labels,
+                          datasets: [{
+                             label: 'Graph Line',
+                             data: data,
+                             backgroundColor: 'rgba(238,0,255,0.3)'
+                          }]
+                       }
+                    };
+
+                    var chart = new Chart(ctx, config);
                 },
                 error: function (resp){
                     console.log('something went wrong')
                 }
             });
+            //const obj = JSON.parse(jsonstr);
+
         }
     </script>
-        <!--let msgcnt = '';
-        let xhr = new XMLHttpRequest();
-        xhr.open('POST', 'chart-js-queries.php');
-        xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded')
-        xhr.send(msgcnt)
-        xhr.onreadystatechange = function (){
-            if(xhr.readyState == 4 && xhr.status == 200){
-                document.getElementById('divChart').innerHTML = <canvas id="cnvChart"></canvas>;
-                let r = JSON.parse(this.response);
-
-                let chart_settings = {
-                    type: "bar",
-                    data: {
-                        labels: r.month.split(','),
-                        datasets: [{r.hz,
-                            label: r.depr,
-                            backgroundColor: "#444",
-                            borderColor: "#444",
-                            data: r.personnel.split(',')
-                    }]
-                },
-                    options: {
-                        legend: {
-                            display: true
-                        }
-                    }
-                }
-                let chart = new Chart(document.getElementById('cnvChart'), chart_settings)
-            }
-        }
-        document.getElementById('selDept').onchange = function () {
-
-        }-->
 
 </body>
 </html>
